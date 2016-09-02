@@ -8,7 +8,10 @@ import numpy as np
 #
 # .. your code here ..
 
-
+df = pd.read_csv("Datasets/census.data", header=None)
+df.columns = [0,'education', 'age', 'capital_gain', 'race', 'capital-loss', 'hours-per-week', 'sex', 'classification']
+#print(df.columns)
+#print(df.head(5))
 
 #
 # TODO:
@@ -24,9 +27,8 @@ import numpy as np
 # na_values when loading the dataframe.
 #
 # .. your code here ..
-
-
-
+df = df.replace('?', np.nan);
+#print(df)
 #
 # TODO:
 # Look through your data and identify any potential categorical
@@ -39,8 +41,8 @@ import numpy as np
 # for these somewhat ambigious features?
 #
 # .. your code here ..
-
-
+df.capital_gain = pd.to_numeric(df.capital_gain, errors='coerce')
+print(df.dtypes)
 
 #
 # TODO:
@@ -48,4 +50,9 @@ import numpy as np
 #
 # .. your code here ..
 
+income_ordered = ['>50K', '<=50K']
 
+df.classification = df.classification.astype("category", ordered=True, categories=income_ordered).cat.codes
+
+df.race = df.race.astype("category").cat.codes
+print(df)
