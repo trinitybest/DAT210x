@@ -32,10 +32,14 @@ labels = ['red' if i=='ckd' else 'green' for i in df.classification]
 #       ['bgr','wc','rc']
 #
 # .. your code here ..
-df = df[['bgr', 'rc', 'wc']]
+df = df.drop(labels=['id', 'classification'], axis=1)
 df.rc = pd.to_numeric(df.rc, errors='coerce')
 df.wc = pd.to_numeric(df.wc, errors='coerce')
-#print(df)
+df.pcv = pd.to_numeric(df.pcv, errors='coerce')
+#print(df['pcv'])
+df = pd.get_dummies(df)
+print(df)
+print(df.dtypes)
 
 
 
