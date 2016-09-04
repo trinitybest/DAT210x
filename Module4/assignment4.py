@@ -5,6 +5,8 @@ import random, math
 
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
+from sklearn.decomposition import PCA
+from sklearn import manifold
 
 def Plot2D(T, title, x, y, num_to_plot=40):
   # This method picks a bunch of random samples (images in your case)
@@ -33,7 +35,9 @@ def Plot2D(T, title, x, y, num_to_plot=40):
 # anither lab. For now, you'll see how to import .mats:
 mat = scipy.io.loadmat('Datasets/face_data.mat')
 df = pd.DataFrame(mat['images']).T
+
 num_images, num_pixels = df.shape
+#print(df.shape)
 num_pixels = int(math.sqrt(num_pixels))
 
 # Rotate the pictures, so we don't have to crane our necks:
@@ -52,15 +56,20 @@ for i in range(num_images):
 # y is the principal component you want displayed on the y-axis, Can be 1 or 2
 #
 # .. your code here ..
-
-
+pca = PCA(n_components=3)
+pca.fit(df)
+T = pca.transform(df)
+Plot2D(T, 'PCA 3 components', 1, 2, num_to_plot=40)
 #
 # TODO: Implement Isomap here. Reduce the dataframe df down
 # to THREE components. Once you've done that, call Plot2D using
 # the first two components.
 #
 # .. your code here ..
-
+iso = manifold.Isomap(n_neighbors=3, n_components=3)
+iso.fit(df)
+T = iso.transform(df)
+Plot2D(T, 'Isomap 3 components', 1, 2, num_to_plot=40)
 
 #
 # TODO: If you're up for a challenge, draw your dataframes in 3D

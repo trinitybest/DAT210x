@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import matplotlib
 import assignment2_helper as helper
 from sklearn.decomposition import PCA
+from sklearn import manifold
 
 # Look pretty...
 matplotlib.style.use('ggplot')

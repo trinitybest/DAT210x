@@ -4,7 +4,7 @@ from scipy import misc
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib
 import matplotlib.pyplot as plt
-
+import os
 # Look pretty...
 matplotlib.style.use('ggplot')
 
@@ -14,6 +14,7 @@ matplotlib.style.use('ggplot')
 # python list. You can call it 'samples'.
 #
 # .. your code here .. 
+samples = []
 
 #
 # TODO: Write a for-loop that iterates over the images in the
@@ -28,8 +29,16 @@ matplotlib.style.use('ggplot')
 # effect on the algorithm's results.
 #
 # .. your code here .. 
+path = 'Datasets/ALOI/32/'
+for filename in os.listdir(path):
+    samples.append((misc.imread(path + filename)[::2,::2]/ 255.0).reshape(-1, 3))
+#print(samples)
+#print(misc.imread('Datasets/ALOI/32/32_r0.png'))
+#print('---')
+#print(misc.imread('Datasets/ALOI/32/32_r0.png').reshape(-1, 3))
 
 
+#print((misc.imread('Datasets/ALOI/32/32_r0.png')/ 255.0).reshape(-1, 3))
 #
 # TODO: Once you're done answering the first three questions,
 # right before you converted your list to a dataframe, add in
@@ -38,7 +47,7 @@ matplotlib.style.use('ggplot')
 # assignment and answer the final question below.
 #
 # .. your code here .. 
-
+df = pd.DataFrame(samples)
 
 #
 # TODO: Convert the list to a dataframe
