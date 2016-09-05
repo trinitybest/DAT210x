@@ -57,7 +57,10 @@ def doKMeans(data, clusters=0):
 # Convert the date using pd.to_datetime, and the time using pd.to_timedelta
 #
 # .. your code here ..
+df = pd.read_csv('Datasets/CDR.csv')
 
+df.CallDate = pd.to_datetime(df.CallDate, errors='coerce')
+df.CallTime = pd.to_timedelta(df.CallTime, errors='coerce')
 
 
 
