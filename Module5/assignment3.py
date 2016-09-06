@@ -2,6 +2,7 @@ import pandas as pd
 from datetime import timedelta
 import matplotlib.pyplot as plt
 import matplotlib
+from sklearn.cluster import KMeans
 
 matplotlib.style.use('ggplot') # Look Pretty
 
@@ -17,12 +18,12 @@ def showandtell(title=None):
   exit()
 
 def clusterInfo(model):
-  print "Cluster Analysis Inertia: ", model.inertia_
-  print '------------------------------------------'
+  print ("Cluster Analysis Inertia: ", model.inertia_)
+  print ('------------------------------------------')
   for i in range(len(model.cluster_centers_)):
-    print "\n  Cluster ", i
-    print "    Centroid ", model.cluster_centers_[i]
-    print "    #Samples ", (model.labels_==i).sum() # NumPy Power
+    print ("\n  Cluster ", i)
+    print ("    Centroid ", model.cluster_centers_[i])
+    print ("    #Samples ", (model.labels_==i).sum()) # NumPy Power
 
 # Find the cluster with the least # attached nodes
 def clusterWithFewestSamples(model):
@@ -33,7 +34,7 @@ def clusterWithFewestSamples(model):
     if minSamples > (model.labels_==i).sum():
       minCluster = i
       minSamples = (model.labels_==i).sum()
-  print "\n  Cluster With Fewest Samples: ", minCluster
+  print ("\n  Cluster With Fewest Samples: ", minCluster)
   return (model.labels_==minCluster)
 
 
@@ -48,6 +49,9 @@ def doKMeans(data, clusters=0):
   # This is part of your domain expertise.
   #
   # .. your code here ..
+  model = KMeans(n_clusters=clusters)
+  model.fit(data)
+
   return model
 
 
@@ -71,7 +75,9 @@ df.CallTime = pd.to_timedelta(df.CallTime, errors='coerce')
 # Hint: https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.tolist.html
 #
 # .. your code here ..
-
+Ins = df.In.unique()
+#print(Ins)
+#print(type(Ins))
 
 #
 # INFO: The locations map above should be too "busy" to really wrap your head around. This
@@ -92,19 +98,22 @@ df.CallTime = pd.to_timedelta(df.CallTime, errors='coerce')
 
 
 
-print "\n\nExamining person: ", 0
+print ("\n\nExamining person: ", 0)
 # 
 # TODO: Create a slice called user1 that filters to only include dataset records where the
 # "In" feature (user phone number) is equal to the first number on your unique list above
 #
 # .. your code here ..
-
-
+user1 = df[df['In'] == Ins[0]]
+user1_wkd = df[df['In'] == Ins[0]]
 #
 # TODO: Alter your slice so that it includes only Weekday (Mon-Fri) values.
 #
 # .. your code here ..
-
+user1_wkd = user1_wkd[(user1_wkd['DOW'] == 'Sat') | (user1_wkd['DOW'] == 'Sun')]
+user1_wkd = user1_wkd[(user1_wkd['CallTime']<'06:00:00') | (user1_wkd['CallTime']>'22:00:00')]
+user1 = user1[(user1['DOW']=='Mon') | (user1['DOW']=='Tue') | (user1['DOW']=='Wed') | (user1['DOW']=='Thu') | (user1['DOW']=='Fri')]
+#print(user1)
 
 #
 # TODO: The idea is that the call was placed before 5pm. From Midnight-730a, the user is
@@ -113,12 +122,17 @@ print "\n\nExamining person: ", 0
 # So the assumption is that most of the time is spent either at work, or in 2nd, at home.
 #
 # .. your code here ..
+user1 = user1[user1['CallTime'] < '17:00:00' ]
+
 
 
 #
 # TODO: Plot the Cell Towers the user connected to
 #
 # .. your code here ..
+fig = plt.figure()
+ax = fig.add_subplot(111)
+ax.scatter(user1.TowerLon, user1.TowerLat, c='g', marker='o', alpha=0.5)
 
 
 
@@ -129,8 +143,19 @@ print "\n\nExamining person: ", 0
 # sweep up the annoying outliers and not-home, not-work travel occasions. the other two will zero in
 # on the user's approximate home location and work locations. Or rather the location of the cell
 # tower closest to them.....
-model = doKMeans(user1, 3)
+user1 = user1[['TowerLon', 'TowerLat']]
+#print(user1)
+model = doKMeans(user1, 4)
+print('------')
+print(model.cluster_centers_)
+ax.scatter(model.cluster_centers_[:,0], model.cluster_centers_[:,1], c='r', marker='x', alpha = 0.8)
 
+kmeans = KMeans(n_clusters=2)
+kmeans.fit(user1_wkd[['TowerLon', 'TowerLat']])
+print(kmeans.cluster_centers_)
+ax.scatter(kmeans.cluster_centers_[:,0], kmeans.cluster_centers_[:,1], c='r', marker='o')
+
+plt.show()
 
 #
 # INFO: Print out the mean CallTime value for the samples belonging to the cluster with the LEAST
@@ -140,7 +165,7 @@ model = doKMeans(user1, 3)
 # work, between the midnight and 5pm?
 midWayClusterIndices = clusterWithFewestSamples(model)
 midWaySamples = user1[midWayClusterIndices]
-print "    Its Waypoint Time: ", midWaySamples.CallTime.mean()
+print ("    Its Waypoint Time: ", midWaySamples.CallTime.mean())
 
 
 #
