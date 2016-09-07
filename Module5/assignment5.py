@@ -53,13 +53,16 @@ def plotDecisionBoundary(model, X, y):
 #
 # .. your code here ..
 
-
-
+X = pd.read_csv('../Module3/Datasets/wheat.data', index_col=0)
+print(X.columns)
 #
 # TODO: Copy the 'wheat_type' series slice out of X, and into a series
 # called 'y'. Then drop the original 'wheat_type' column from the X
 #
 # .. your code here ..
+y = X['wheat_type'].copy()
+X = X.drop(labels=['wheat_type'], axis = 1)
+#print(type(y))
 
 
 
@@ -67,14 +70,14 @@ def plotDecisionBoundary(model, X, y):
 # classification isn't ordinal, but just as an experiment...
 #
 # .. your code here ..
-
-
+y = y.astype('category').cat.codes
+#print(y)
 
 #
 # TODO: Basic nan munging. Fill each row's nans with the mean of the feature
 #
 # .. your code here ..
-
+X.fillna()
 
 
 #
