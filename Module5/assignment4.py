@@ -35,7 +35,7 @@ def drawVectors(transformed_features, components_, columns, plt):
   import math
   important_features = { columns[i] : math.sqrt(xvector[i]**2 + yvector[i]**2) for i in range(num_columns) }
   important_features = sorted(zip(important_features.values(), important_features.keys()), reverse=True)
-  print "Projected Features by importance:\n", important_features
+  print ("Projected Features by importance:\n", important_features)
 
   ax = plt.axes()
 
@@ -61,6 +61,9 @@ def doKMeans(data, clusters=0):
   # centers and the labels
   #
   # .. your code here ..
+  from sklearn.cluster import KMeans
+  model = KMeans(n_clusters=clusters)
+  model.fit(data)
   return model.cluster_centers_, model.labels_
 
 
@@ -71,7 +74,9 @@ def doKMeans(data, clusters=0):
 # on it.
 #
 # .. your code here ..
-
+df = pd.read_csv('Datasets/Wholesale customers data.csv')
+df.fillna(value=0)
+#print(df)
 #
 # TODO: As instructed, get rid of the 'Channel' and 'Region' columns, since
 # you'll be investigating as if this were a single location wholesaler, rather
@@ -79,6 +84,7 @@ def doKMeans(data, clusters=0):
 # KMeans to examine and give weight to them.
 #
 # .. your code here ..
+df = df.drop(labels=['Channel', 'Region'], axis = 1)
 
 
 #
@@ -88,7 +94,9 @@ def doKMeans(data, clusters=0):
 #
 # .. your code here ..
 
-
+print(df.describe())
+#df.plot.hist()
+#plt.show()
 #
 # INFO: Having checked out your data, you may have noticed there's a pretty big gap
 # between the top customers in each feature category and the rest. Some feature
@@ -101,12 +109,14 @@ def doKMeans(data, clusters=0):
 #
 # Remove top 5 and bottom 5 samples for each column:
 drop = {}
+print('---')
+print(df.columns)
 for col in df.columns:
   # Bottom 5
   sort = df.sort_values(by=col, ascending=True)
   if len(sort) > 5: sort=sort[:5]
   for index in sort.index: drop[index] = True # Just store the index once
-
+  #print(sort.index)
   # Top 5
   sort = df.sort_values(by=col, ascending=False)
   if len(sort) > 5: sort=sort[:5]
@@ -118,10 +128,11 @@ for col in df.columns:
 # to, if there is a single row that satisfies the drop for multiple columns.
 # Since there are 6 rows, if we end up dropping < 5*6*2 = 60 rows, that means
 # there indeed were collisions.
-print "Dropping {0} Outliers...".format(len(drop))
+print ("Dropping {0} Outliers...".format(len(drop)))
 df.drop(inplace=True, labels=drop.keys(), axis=0)
-print df.describe()
-
+print (df.describe())
+#df.plot.hist()
+#plt.show()
 
 #
 # INFO: What are you interested in?
@@ -175,8 +186,10 @@ print df.describe()
 #T = preprocessing.StandardScaler().fit_transform(df)
 #T = preprocessing.MinMaxScaler().fit_transform(df)
 #T = preprocessing.MaxAbsScaler().fit_transform(df)
-#T = preprocessing.Normalizer().fit_transform(df)
-T = df # No Change
+T = preprocessing.Normalizer().fit_transform(df)
+#plt.hist(T)
+#lt.show()
+#T = df # No Change
 
 
 #
@@ -199,6 +212,7 @@ centroids, labels = doKMeans(T, n_clusters)
 # is good. Print them out before you transform them into PCA space for viewing
 #
 # .. your code here ..
+print(centroids)
 
 
 # Do PCA *after* to visualize the results. Project the centroids as well as 
@@ -219,6 +233,7 @@ if PLOT_TYPE_TEXT:
 else:
   # Plot a regular scatter plot
   sample_colors = [ c[labels[i]] for i in range(len(T)) ]
+  #print(sample_colors)
   ax.scatter(T[:, 0], T[:, 1], c=sample_colors, marker='o', alpha=0.2)
 
 
@@ -233,6 +248,6 @@ if PLOT_VECTORS: drawVectors(T, display_pca.components_, df.columns, plt)
 
 # Add the cluster label back into the dataframe and display it:
 df['label'] = pd.Series(labels, index=df.index)
-print df
+print (df)
 
 plt.show()

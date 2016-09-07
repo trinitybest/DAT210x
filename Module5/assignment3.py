@@ -29,6 +29,7 @@ def clusterInfo(model):
 def clusterWithFewestSamples(model):
   # Ensure there's at least on cluster...
   minSamples = len(model.labels_)
+  print(model.labels_)
   minCluster = 0
   for i in range(len(model.cluster_centers_)):
     if minSamples > (model.labels_==i).sum():
@@ -132,7 +133,7 @@ user1 = user1[user1['CallTime'] < '17:00:00' ]
 # .. your code here ..
 fig = plt.figure()
 ax = fig.add_subplot(111)
-ax.scatter(user1.TowerLon, user1.TowerLat, c='g', marker='o', alpha=0.5)
+ax.scatter(user1.TowerLat, user1.TowerLon, c='g', marker='o', alpha=0.5)
 
 
 
@@ -143,19 +144,19 @@ ax.scatter(user1.TowerLon, user1.TowerLat, c='g', marker='o', alpha=0.5)
 # sweep up the annoying outliers and not-home, not-work travel occasions. the other two will zero in
 # on the user's approximate home location and work locations. Or rather the location of the cell
 # tower closest to them.....
-user1 = user1[['TowerLon', 'TowerLat']]
+#user1 = user1[['TowerLat', 'TowerLon']]
 #print(user1)
-model = doKMeans(user1, 4)
+model = doKMeans(user1[['TowerLat', 'TowerLon']], 3)
 print('------')
 print(model.cluster_centers_)
 ax.scatter(model.cluster_centers_[:,0], model.cluster_centers_[:,1], c='r', marker='x', alpha = 0.8)
 
 kmeans = KMeans(n_clusters=2)
-kmeans.fit(user1_wkd[['TowerLon', 'TowerLat']])
+kmeans.fit(user1_wkd[['TowerLat', 'TowerLon']])
 print(kmeans.cluster_centers_)
 ax.scatter(kmeans.cluster_centers_[:,0], kmeans.cluster_centers_[:,1], c='r', marker='o')
 
-plt.show()
+#plt.show()
 
 #
 # INFO: Print out the mean CallTime value for the samples belonging to the cluster with the LEAST
@@ -164,6 +165,7 @@ plt.show()
 # should be somewhere in between the two. What time, on average, is the user in between home and
 # work, between the midnight and 5pm?
 midWayClusterIndices = clusterWithFewestSamples(model)
+print(midWayClusterIndices)
 midWaySamples = user1[midWayClusterIndices]
 print ("    Its Waypoint Time: ", midWaySamples.CallTime.mean())
 
@@ -171,7 +173,7 @@ print ("    Its Waypoint Time: ", midWaySamples.CallTime.mean())
 #
 # Let's visualize the results!
 # First draw the X's for the clusters:
-ax.scatter(model.cluster_centers_[:,1], model.cluster_centers_[:,0], s=169, c='r', marker='x', alpha=0.8, linewidths=2)
+ax.scatter(model.cluster_centers_[:,0], model.cluster_centers_[:,1], s=169, c='r', marker='x', alpha=0.8, linewidths=2)
 #
 # Then save the results:
 showandtell('Weekday Calls Centroids')  # Comment this line out when you're ready to proceed
