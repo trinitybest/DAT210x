@@ -2,6 +2,11 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib
+from sklearn.cross_validation import train_test_split
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn import preprocessing
+from sklearn.decomposition import PCA
+from sklearn.metrics import accuracy_score
 
 matplotlib.style.use('ggplot') # Look Pretty
 
@@ -54,7 +59,7 @@ def plotDecisionBoundary(model, X, y):
 # .. your code here ..
 
 X = pd.read_csv('../Module3/Datasets/wheat.data', index_col=0)
-print(X.columns)
+#print(X.head())
 #
 # TODO: Copy the 'wheat_type' series slice out of X, and into a series
 # called 'y'. Then drop the original 'wheat_type' column from the X
@@ -77,8 +82,8 @@ y = y.astype('category').cat.codes
 # TODO: Basic nan munging. Fill each row's nans with the mean of the feature
 #
 # .. your code here ..
-X.fillna()
-
+X = X.fillna(X.mean())
+#print(X)
 
 #
 # TODO: Split X into training and testing data sets using train_test_split().
@@ -88,8 +93,10 @@ X.fillna()
 #
 # .. your code here ..
 
-
-
+data_train, data_test, label_train, label_test=train_test_split(X, y, test_size=0.33, random_state=1)
+#X.hist()
+#plt.show()
+#print(1, type(data_train))
 # 
 # TODO: Create an instance of SKLearn's Normalizer class and then train it
 # using its .fit() method against your *training* data.
@@ -102,6 +109,12 @@ X.fillna()
 #
 # .. your code here ..
 
+#model = KNeighborsClassifier(n_neighbors=5)
+processor = preprocessing.Normalizer()
+processor.fit(data_train)
+#print(T)
+#plt.hist(T)
+#plt.show()
 
 
 #
@@ -113,9 +126,11 @@ X.fillna()
 # feature-space as the original data used to train your models.
 #
 # .. your code here ..
-
-
-
+data_train = processor.fit_transform(data_train)
+data_test = processor.fit_transform(data_test)
+#print(2, type(data_train))
+##plt.hist(data_train,bins = 10)
+#plt.show()
 
 #
 # TODO: Just like your preprocessing transformation, create a PCA
@@ -127,8 +142,10 @@ X.fillna()
 # boundary in 2D would be if your KNN algo ran in 2D as well:
 #
 # .. your code here ..
-
-
+pca = PCA(n_components=2)
+pca.fit(data_train)
+data_train_pca = pca.transform(data_train)
+data_test_pca = pca.transform(data_test)
 
 
 #
@@ -138,12 +155,15 @@ X.fillna()
 # your labels.
 #
 # .. your code here ..
-
+knn = KNeighborsClassifier(n_neighbors=9)
+knn.fit(data_train_pca, label_train)
 
 
 
 # HINT: Ensure your KNeighbors classifier object from earlier is called 'knn'
-plotDecisionBoundary(knn, X_train, y_train)
+X_train = data_train_pca
+y_train = label_train
+#plotDecisionBoundary(knn, X_train, y_train)
 
 
 #------------------------------------
@@ -155,7 +175,7 @@ plotDecisionBoundary(knn, X_train, y_train)
 # .score will take care of running your predictions for you automatically.
 #
 # .. your code here ..
-
+print(knn.score(data_test_pca, label_test))
 
 
 #
