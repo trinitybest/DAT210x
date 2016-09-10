@@ -3,6 +3,8 @@ import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
 
+from sklearn import linear_model
+
 matplotlib.style.use('ggplot') # Look Pretty
 
 
@@ -15,9 +17,9 @@ def drawLine(model, X_test, y_test, title):
   ax.scatter(X_test, y_test, c='g', marker='o')
   ax.plot(X_test, model.predict(X_test), color='orange', linewidth=1, alpha=0.7)
 
-  print "Est 2014 " + title + " Life Expectancy: ", model.predict([[2014]])[0]
-  print "Est 2030 " + title + " Life Expectancy: ", model.predict([[2030]])[0]
-  print "Est 2045 " + title + " Life Expectancy: ", model.predict([[2045]])[0]
+  print ("Est 2014 " + title + " Life Expectancy: ", model.predict([[2014]])[0])
+  print ("Est 2030 " + title + " Life Expectancy: ", model.predict([[2030]])[0])
+  print ("Est 2045 " + title + " Life Expectancy: ", model.predict([[2045]])[0])
 
   score = model.score(X_test, y_test)
   title += " R2: " + str(score)
@@ -34,7 +36,9 @@ def drawLine(model, X_test, y_test, title):
 # spread sheet application
 #
 # .. your code here ..
-
+X = pd.read_csv('Datasets/life_expectancy.csv', sep='\t')
+#print(X.head())
+#print(X.describe())
 
 #
 # TODO: Create your linear regression model here and store it in a
@@ -42,6 +46,7 @@ def drawLine(model, X_test, y_test, title):
 # with it yet:
 #
 # .. your code here ..
+model = linear_model.LinearRegression()
 
 
 
@@ -54,7 +59,8 @@ def drawLine(model, X_test, y_test, title):
 # of this document before proceeding.
 #
 # .. your code here ..
-
+X_train = X[X['Year']<1986]['Year'].reshape(-1,1)
+y_train = X[X['Year']<1986]['WhiteMale'].reshape(-1,1)
 
 
 #
@@ -66,14 +72,14 @@ def drawLine(model, X_test, y_test, title):
 # 2030 and 2045 extrapolation.
 #
 # .. your code here ..
-
-
+model.fit(X_train, y_train)
+drawLine(model, X_train, y_train, 'WhiteMale')
 #
 # TODO: Print the actual 2014 WhiteMale life expectancy from your
 # loaded dataset
 #
 # .. your code here ..
-
+print(X[X['Year']==2014].iloc[0]['WhiteMale'])
 
 
 # 
@@ -83,8 +89,11 @@ def drawLine(model, X_test, y_test, title):
 # BlackFemale life expectancy
 #
 # .. your code here ..
-
-
+X_train = X[X['Year']<1986]['Year'].reshape(-1,1)
+y_train = X[X['Year']<1986]['BlackFemale'].reshape(-1,1)
+model.fit(X_train, y_train)
+drawLine(model, X_train, y_train, 'BlackFemale')
+print(X[X['Year']==2014].iloc[0]['BlackFemale'])
 
 #
 # TODO: Lastly, print out a correlation matrix for your entire
@@ -93,6 +102,13 @@ def drawLine(model, X_test, y_test, title):
 # the course
 #
 # .. your code here ..
+X = X.drop(labels = ['Year'], axis = 1)
+print(X.corr())
+plt.imshow(X.corr(), cmap=plt.cm.Blues, interpolation='nearest')
+plt.colorbar()
+tick_marks = [i for i in range(len(X.columns))]
+plt.xticks(tick_marks, X.columns, rotation='vertical')
+plt.yticks(tick_marks, X.columns)
 
 plt.show()
 

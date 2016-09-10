@@ -2,6 +2,10 @@ import numpy as np
 import pandas as pd
 
 import scipy.io.wavfile as wavfile
+import os
+from os.path import join
+import scipy.io.wavfile as wavfile
+
 
 # Good Luck!
 
@@ -51,9 +55,12 @@ Provided_Portion = 0.25
 # just the data!) to your Python list 'zero':
 #
 # .. your code here ..
-
-
-
+zero = []
+path = 'Datasets/recordings/'
+for filename in os.listdir(path):
+    #print(path+filename)
+    sample_rate, audio_data = wavfile.read(path+filename)
+    zero.append(audio_data)
 # 
 # TODO: Just for a second, convert zero into a DataFrame. When you do
 # so, set the dtype to np.int16, since the input audio files are 16
@@ -209,7 +216,7 @@ y_test_prediction = y_test_prediction.astype(dtype=np.int16)
 # by passing in your test data and test label (y_test).
 #
 # .. your code here ..
-print "Extrapolation R^2 Score: ", score
+print ("Extrapolation R^2 Score: ", score)
 
 
 #

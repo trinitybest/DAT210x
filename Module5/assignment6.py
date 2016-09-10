@@ -5,12 +5,16 @@ import scipy.io
 
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
+from sklearn.cross_validation import train_test_split
+from sklearn.decomposition import PCA
+from sklearn.manifold import Isomap
+from sklearn.neighbors import KNeighborsClassifier
 
 # If you'd like to try this lab with PCA instead of Isomap,
 # as the dimensionality reduction technique:
 Test_PCA = False
 
-matplotlib.style.use('ggplot') # Look Pretty
+plt.style.use('ggplot') # Look Pretty
 
 
 def Plot2DBoundary(DTrain, LTrain, DTest, LTest):
@@ -48,10 +52,12 @@ def Plot2DBoundary(DTrain, LTrain, DTest, LTest):
   # Using the boundaries, actually make the 2D Grid Matrix:
   xx, yy = np.meshgrid(np.arange(x_min, x_max, resolution),
                        np.arange(y_min, y_max, resolution))
-
+  print(xx)
   # What class does the classifier say about each spot on the chart?
   # The values stored in the matrix are the predictions of the model
   # at said location:
+      
+  # This part is fantastic!!!   
   Z = model.predict(np.c_[xx.ravel(), yy.ravel()])
   Z = Z.reshape(xx.shape)
 
@@ -98,7 +104,15 @@ def Plot2DBoundary(DTrain, LTrain, DTest, LTest):
 # instead of sideways. This was demonstrated in the M4/A4 code:
 #
 # .. your code here ..
-
+mat = scipy.io.loadmat('../Module4/Datasets/face_data.mat')
+#print(mat)
+df = pd.DataFrame(mat['images']).T
+#print(df)
+num_images, num_pixels = df.shape
+#print(df.shape)
+num_pixels = int(math.sqrt(num_pixels))
+for i in range(num_images):
+    df.loc[i,:] = df.loc[i,:].reshape(num_pixels, num_pixels).T.reshape(-1)
 
 #
 # TODO: Load up your face_labels dataset. It only has a single column, and
@@ -109,8 +123,8 @@ def Plot2DBoundary(DTrain, LTrain, DTest, LTest):
 # loaded it correctly
 #
 # .. your code here ..
-
-
+face_labels = pd.read_csv('Datasets/face_labels.csv', header=None)
+face_labels = face_labels[0]
 #
 # TODO: Do train_test_split. Use the same code as on the EdX platform in the
 # reading material, but set the random_state=7 for reproduceability, and play
@@ -121,7 +135,7 @@ def Plot2DBoundary(DTrain, LTrain, DTest, LTest):
 # rather than as points:
 #
 # .. your code here ..
-
+data_train, data_test, label_train, label_test = train_test_split(df, face_labels, test_size = 0.1, random_state=7)
 
 
 if Test_PCA:
@@ -136,7 +150,7 @@ if Test_PCA:
   # Your model should only be trained (fit) against the training data (data_train)
   # Once you've done this, you need use the model to transform both data_train
   # and data_test from their original high-D image feature space, down to 2D
-
+  
   #
   #
   # TODO: Implement PCA here. ONLY train against your training data, but
@@ -144,7 +158,10 @@ if Test_PCA:
   # data_train, and data_test.
   #
   # .. your code here ..
-
+  pca = PCA(n_components=2)
+  pca.fit(data_train)
+  data_train= pca.transform(data_train)
+  data_test = pca.transform(data_test)
 else:
   # INFO: Isomap is used *before* KNeighbors to simplify your high dimensionality
   # image samples down to just 2 components! A lot of information has been is
@@ -166,7 +183,10 @@ else:
   # data_train, and data_test.
   #
   # .. your code here ..
-
+  isomap = Isomap(n_neighbors=5, n_components=2)
+  isomap.fit(data_train)
+  data_train= isomap.transform(data_train)
+  data_test = isomap.transform(data_test)
 
 
 
@@ -178,6 +198,10 @@ else:
 # labels that those 2d representations should be.
 #
 # .. your code here ..
+model = KNeighborsClassifier(n_neighbors = 15)
+model.fit(data_train, label_train)
+
+
 
 # NOTE: K-NEIGHBORS DOES NOT CARE WHAT THE ANSWERS SHOULD BE! In fact, it
 # just tosses that information away. All KNeighbors cares about storing is

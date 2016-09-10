@@ -1,10 +1,17 @@
+import pandas as pd
+from sklearn.preprocessing import StandardScaler
+from sklearn.cross_validation import train_test_split
+from sklearn.decomposition import PCA
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.manifold import Isomap
+
 # If you'd like to try this lab with PCA instead of Isomap,
 # as the dimensionality reduction technique:
-Test_PCA = True
+Test_PCA = False
 
 
 def plotDecisionBoundary(model, X, y):
-  print "Plotting..."
+  print ("Plotting...")
   import matplotlib.pyplot as plt
   import matplotlib
   matplotlib.style.use('ggplot') # Look Pretty
@@ -58,22 +65,26 @@ def plotDecisionBoundary(model, X, y):
 # Be sure to verify the rows line up by looking at the file in a text editor.
 #
 # .. your code here ..
-
-
+df = pd.read_csv('Datasets/breast-cancer-wisconsin.data', header=None)
+#print(df.head())
+df.columns = ['sample', 'thickness', 'size', 'shape', 'adhesion', 'epithelial', 'nuclei', 'chromatin', 'nucleoli', 'mitoses', 'status']
 # 
 # TODO: Copy out the status column into a slice, then drop it from the main
 # dataframe. You can also drop the sample column, since that doesn't provide
 # us with any machine learning power.
 #
 # .. your code here ..
-
+status = df['status'].copy()
+df = df.drop(labels=['status', 'sample'], axis = 1)
 
 #
 # TODO: With the labels safely extracted from the dataset, replace any nan values
 # with the mean feature / column value
 #
 # .. your code here ..
-
+df.nuclei = pd.to_numeric(df.nuclei, errors='coerce')
+df = df.fillna(df.mean())
+#print(df.dtypes)
 
 #
 # TODO: Experiment with the basic SKLearn preprocessing scalers. We know that
@@ -83,6 +94,14 @@ def plotDecisionBoundary(model, X, y):
 #
 # .. your code here ..
 
+"""
+processor = StandardScaler()
+processor.fit(df)
+df = processor.transform(df)
+print(type(df))
+print(df.describe())
+"""
+df = StandardScaler().fit_transform(df)
 
 #
 # TODO: Do train_test_split. Use the same variable names as on the EdX platform in
@@ -91,29 +110,30 @@ def plotDecisionBoundary(model, X, y):
 #
 # .. your code here ..
 
-
+data_train, data_test, label_train, label_test = train_test_split(df, status, test_size=0.33, random_state=7)
 
 #
 # PCA and Isomap are your new best friends
 model = None
 if Test_PCA:
-  print "Computing 2D Principle Components"
+  print ("Computing 2D Principle Components")
   #
   # TODO: Implement PCA here. save your model into the variable 'model'.
   # You should reduce down to two dimensions.
   #
   # .. your code here ..
-  
+  md = PCA(n_components = 2)
+
 
 else:
-  print "Computing 2D Isomap Manifold"
+  print ("Computing 2D Isomap Manifold")
   #
   # TODO: Implement Isomap here. save your model into the variable 'model'
   # Experiment with K values from 5-10.
   # You should reduce down to two dimensions.
   #
   # .. your code here ..
-
+  md = Isomap(n_neighbors=5, n_components=2)
 
 
 #
@@ -122,7 +142,9 @@ else:
 # back into the variables themselves.
 #
 # .. your code here ..
-
+md.fit(data_train)
+data_train = md.transform(data_train)
+data_test = md.transform(data_test)
 
 # 
 # TODO: Implement and train KNeighborsClassifier on your projected 2D
@@ -133,7 +155,9 @@ else:
 # parameter affects the results.
 #
 # .. your code here ..
-
+#model = KNeighborsClassifier(n_neighbors=10, weights='uniform')
+model = KNeighborsClassifier(n_neighbors=10, weights='distance')
+model.fit(data_train, label_train)
 #
 # INFO: Be sure to always keep the domain of the problem in mind! It's
 # WAY more important to errantly classify a benign tumor as malignant,
@@ -150,7 +174,7 @@ else:
 # TODO: Calculate + Print the accuracy of the testing set
 #
 # .. your code here ..
-
+print(knn.score(data_test, label_test))
 
 plotDecisionBoundary(model, data_test, label_test)
 
